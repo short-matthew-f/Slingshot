@@ -2,11 +2,12 @@ var GRAVITY_POWER = 2,
     RADIUS_CAP    = 1;
 
 var Body = function (opts) {
-  this.mass         = opts.mass         || 0.5;
+  this.mass         = opts.mass         || 1;
   this.position     = opts.position     || new Vector(0, 0);
   this.velocity     = opts.velocity     || new Vector(0, 0);
   this.acceleration = opts.acceleration || new Vector(0, 0);
 
+  this.isShip       = !!opts.isShip;
   this.fixed        = !!opts.fixed;
 
   this.$el      = this.toSVG();
@@ -14,10 +15,17 @@ var Body = function (opts) {
 
 Body.prototype.toSVG = function () {
   var cx = GRIDSIZE * (this.position.x + 0.5),
-      cy = GRIDSIZE * (this.position.y + 0.5),
-      r  = GRIDSIZE * (4 + Math.log(this.mass, 2)) / 8;
+      cy = GRIDSIZE * (this.position.y + 0.5);
 
-  var $body = $("<circle class='body'>")
+  if (this.isShip) {
+    var bodyClass = "body ship";
+    var r  = GRIDSIZE / 5;
+  } else {
+    var bodyClass = "body planet";
+    var r  = GRIDSIZE * (4 + Math.log(this.mass, 2)) / 8;
+  };
+
+  var $body = $("<circle class='" + bodyClass + "'>")
                   .attr("cx", cx)
                   .attr("cy", cy)
                   .attr("r",  r);
@@ -27,8 +35,13 @@ Body.prototype.toSVG = function () {
 
 Body.prototype.updateSVG = function () {
   var cx = GRIDSIZE * (this.position.x + 0.5),
-      cy = GRIDSIZE * (this.position.y + 0.5),
-      r  = GRIDSIZE * (4 + Math.log(this.mass, 2)) / 8;
+      cy = GRIDSIZE * (this.position.y + 0.5);
+
+  if (this.isShip) {
+    var r  = GRIDSIZE / 5;
+  } else {
+    var r  = GRIDSIZE * (4 + Math.log(this.mass, 2)) / 8;
+  };
 
   this.$el.attr("cx", cx)
           .attr("cy", cy)
@@ -54,7 +67,7 @@ Body.prototype.calculateNextAcceleration = function (bodies) {
   for (var i = 0; i < bodies.length; i++) {
     var body      = bodies[i];
 
-    if (thisBody !== body) {
+    if (thisBody !== body && !body.isShip) {
       var radius    = Math.max(RADIUS_CAP, Vector.distance(thisBody.position, body.position)),
           gravity   = body.mass / (Math.pow(radius, GRAVITY_POWER)),
           direction = Vector.subtract(body.position, thisBody.position);

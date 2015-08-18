@@ -18,10 +18,10 @@
   stroke-width: 1px;
 }
 
-.ship {
+.body.ship {
   stroke: red;
   fill: white;
-  stroke-width: 2px;
+  stroke-width: 1px;
 }
 
 .grid {

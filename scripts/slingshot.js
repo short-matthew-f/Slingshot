@@ -46,7 +46,7 @@ $('#launch').on('click', function (e) {
   var ship = new Body({
     position: new Vector(1, GRIDCOUNT),
     velocity: new Vector(0, -0.1),
-    mass:     0.1,
+    isShip:   true,
     fixed:    false
   });
 
