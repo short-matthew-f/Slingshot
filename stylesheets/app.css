@@ -1,0 +1,31 @@
+* {
+  box-sizing: border-box;
+}
+
+#space {
+  background: #222;
+}
+
+.body {
+  stroke: green;
+  fill: blue;
+  stroke-width: 2px;
+}
+
+.body.fixed {
+  stroke: white;
+  fill: lightgrey;
+  stroke-width: 1px;
+}
+
+.ship {
+  stroke: red;
+  fill: white;
+  stroke-width: 2px;
+}
+
+.grid {
+  stroke: lightblue;
+  stroke-width: 1px;
+  stroke-dasharray: 1, 5;
+}
