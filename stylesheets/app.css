@@ -12,6 +12,11 @@
   stroke-width: 2px;
 }
 
+.body:hover, .body.fixed:hover {
+  fill: lightblue;
+  stroke-width: 6px;
+}
+
 .body.fixed {
   stroke: white;
   fill: lightgrey;

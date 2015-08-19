@@ -1,6 +1,7 @@
 var planets = [];
 
-var $space = $("#space").attr('width', SVGSIZE).attr('height', SVGSIZE);
+var $space = $("#space").attr('width', SVGSIZE)
+                        .attr('height', SVGSIZE);
 
 addGridToSpace();
 
@@ -17,29 +18,28 @@ $space.on('mousedown .body', function (e) {
       body.fixed = !body.fixed;
     };
   } else if ($tar.is('svg')) {
-    var i = Math.floor(e.offsetX / GRIDSIZE),
-        j = Math.floor(e.offsetY / GRIDSIZE);
+    var i       = Math.floor(e.offsetX / GRIDSIZE),
+        j       = Math.floor(e.offsetY / GRIDSIZE),
+        newBody = new Body({
+          position: new Vector(i, j),
+          mass:     0.25,
+          fixed:    true
+        });
 
-    planets.push(new Body({
-      position: new Vector(i, j),
-      mass:     0.25,
-      fixed:    true
-    }));
+    planets.push(newBody);
+    $space.append(newBody.$el);
   };
 });
 
 setInterval(function () {
-  $('.body').remove();
-
   Body.updateSystem(planets);
 
   planets.forEach(function (planet, i) {
     planet.updateSVG();
-    $space.append(planet.$el);
     planet.$el.attr('data-index', i);
   });
 
-  $space.html($space.html());
+  // $space.html($space.html());
 }, TICKER)
 
 $('#launch').on('click', function (e) {
@@ -51,6 +51,7 @@ $('#launch').on('click', function (e) {
   });
 
   planets.push(ship);
+  $space.append(ship.$el);
 });
 
 $('#swap').on('click', function (e) {
