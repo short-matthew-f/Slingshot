@@ -7,7 +7,7 @@ addGridToSpace();
 $space.on('mousedown .body', function (e) {
   var $tar = $(e.target);
 
-  if ($tar.is('circle')) {
+  if ($tar.is('.planet')) {
     var i = $(e.target).data('index'),
         body = planets[i];
 
@@ -51,6 +51,14 @@ $('#launch').on('click', function (e) {
   });
 
   planets.push(ship);
+});
+
+$('#swap').on('click', function (e) {
+  planets.forEach(function (planet) {
+    if (planet.isShip) { return; }
+    
+    planet.fixed = !planet.fixed;
+  });
 });
 
 /* Utilities */
