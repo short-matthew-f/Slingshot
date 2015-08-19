@@ -15,15 +15,16 @@ $space.on('mousedown .body', function (e) {
     if (e.shiftKey) {
       body.mass += 0.25;
     } else {
-      body.fixed = !body.fixed;
+      body.isFixed = !body.isFixed;
     };
   } else if ($tar.is('svg')) {
     var i       = Math.floor(e.offsetX / GRIDSIZE),
         j       = Math.floor(e.offsetY / GRIDSIZE),
         newBody = new Body({
           position: new Vector(i, j),
+          type:     'planet',
           mass:     0.25,
-          fixed:    true
+          isFixed:  true
         });
 
     planets.push(newBody);
@@ -46,8 +47,8 @@ $('#launch').on('click', function (e) {
   var ship = new Body({
     position: new Vector(1, GRIDCOUNT),
     velocity: new Vector(0, -0.1),
-    isShip:   true,
-    fixed:    false
+    type:     'ship',
+    isFixed:  false
   });
 
   planets.push(ship);
@@ -56,9 +57,9 @@ $('#launch').on('click', function (e) {
 
 $('#swap').on('click', function (e) {
   planets.forEach(function (planet) {
-    if (planet.isShip) { return; }
+    if (planet.type == 'ship') { return; }
 
-    planet.fixed = !planet.fixed;
+    planet.isFixed = !planet.isFixed;
   });
 });
 

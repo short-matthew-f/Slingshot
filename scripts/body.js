@@ -7,8 +7,8 @@ var Body = function (opts) {
   this.velocity     = opts.velocity     || new Vector(0, 0);
   this.acceleration = opts.acceleration || new Vector(0, 0);
 
-  this.isShip       = !!opts.isShip;
-  this.fixed        = !!opts.fixed;
+  this.type         = opts.type         || 'planet';
+  this.isFixed      = !!opts.isFixed;
 
   this.$el      = this.toSVG();
 };
@@ -17,7 +17,7 @@ Body.prototype.toSVG = function () {
   var cx = GRIDSIZE * (this.position.x + 0.5),
       cy = GRIDSIZE * (this.position.y + 0.5);
 
-  if (this.isShip) {
+  if (this.type === 'ship') {
     var r  = GRIDSIZE / 5;
   } else {
     var r  = GRIDSIZE * (4 + Math.log(this.mass, 2)) / 8;
@@ -25,10 +25,11 @@ Body.prototype.toSVG = function () {
 
   var body = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
 
-  body.classList.add("body",
-    this.isShip ? "ship" : "planet",
-    this.isFixed ? "fixed" : "motile"
-  );
+  if (this.isFixed) {
+    body.classList.add('fixed');
+  }
+
+  body.classList.add("body", this.type);
 
   var $body = $(body).attr("cx", cx)
                      .attr("cy", cy)
@@ -41,9 +42,7 @@ Body.prototype.updateSVG = function () {
   var cx = GRIDSIZE * (this.position.x + 0.5),
       cy = GRIDSIZE * (this.position.y + 0.5);
 
-  if (this.isShip) {
-    var r  = GRIDSIZE / 5;
-  } else {
+  if (this.type !== 'ship') {
     var r  = GRIDSIZE * (4 + Math.log(this.mass, 2)) / 8;
   };
 
@@ -51,7 +50,7 @@ Body.prototype.updateSVG = function () {
           .attr("cy", cy)
           .attr("r",  r);
 
-  if (this.fixed) {
+  if (this.isFixed) {
     this.$el[0].classList.add('fixed')
   } else {
     this.$el[0].classList.remove('fixed');
@@ -60,7 +59,7 @@ Body.prototype.updateSVG = function () {
 
 
 Body.prototype.calculateNextAcceleration = function (bodies) {
-  if (this.fixed) {
+  if (this.isFixed) {
     this.velocity = new Vector(0, 0);
     this.acceleration = new Vector(0, 0);
     return;
@@ -71,7 +70,7 @@ Body.prototype.calculateNextAcceleration = function (bodies) {
   for (var i = 0; i < bodies.length; i++) {
     var body      = bodies[i];
 
-    if (thisBody !== body && !body.isShip) {
+    if (thisBody !== body && body.type === 'planet') {
       var radius    = Math.max(RADIUS_CAP, Vector.distance(thisBody.position, body.position)),
           gravity   = body.mass / (Math.pow(radius, GRAVITY_POWER)),
           direction = Vector.subtract(body.position, thisBody.position);
