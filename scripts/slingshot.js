@@ -1,46 +1,53 @@
-var planets = [];
+var universe = new Universe;
 
 var $space = $("#space").attr('width', SVGSIZE)
                         .attr('height', SVGSIZE);
 
 addGridToSpace();
+addPlanetsToSpace();
 
 $space.on('mousedown .body', function (e) {
   var $tar = $(e.target);
 
-  if ($tar.is('.planet')) {
-    var i = $(e.target).data('index'),
-        body = planets[i];
+  if ($tar.is('.anomaly')) {
+    var id      = $(e.target).data('id'),
+        anomaly = universe.anomalies[id];
 
     if (e.shiftKey) {
-      body.mass += 0.25;
+      anomaly.$el.remove()
+      delete universe.anomalies[id];
     } else {
-      body.isFixed = !body.isFixed;
-    };
+      anomaly.mass += 0.25;
+    }
   } else if ($tar.is('svg')) {
     var i       = Math.floor(e.offsetX / GRIDSIZE),
         j       = Math.floor(e.offsetY / GRIDSIZE),
-        newBody = new Body({
+        anomaly = new Body({
           position: new Vector(i, j),
-          type:     'planet',
+          type:     'anomaly',
           mass:     0.25,
           isFixed:  true
         });
 
-    planets.push(newBody);
-    $space.append(newBody.$el);
+    universe.add(anomaly);
+    $space.append(anomaly.$el);
   };
 });
 
 setInterval(function () {
-  Body.updateSystem(planets);
+  Body.updateSystem(universe);
 
-  planets.forEach(function (planet, i) {
+  $.each(universe.planets, function (id, planet) {
     planet.updateSVG();
-    planet.$el.attr('data-index', i);
   });
 
-  // $space.html($space.html());
+  $.each(universe.ships, function (id, ship) {
+    ship.updateSVG();
+  });
+
+  $.each(universe.anomalies, function (id, anomaly) {
+    anomaly.updateSVG();
+  });
 }, TICKER)
 
 $('#launch').on('click', function (e) {
@@ -51,14 +58,12 @@ $('#launch').on('click', function (e) {
     isFixed:  false
   });
 
-  planets.push(ship);
+  universe.add(ship);
   $space.append(ship.$el);
 });
 
 $('#swap').on('click', function (e) {
-  planets.forEach(function (planet) {
-    if (planet.type == 'ship') { return; }
-
+  $.each(universe.planets, function (id, planet) {
     planet.isFixed = !planet.isFixed;
   });
 });
@@ -83,3 +88,20 @@ function addGridToSpace () {
     $space.append($hLine).append($vLine);
   };
 };
+
+function addPlanetsToSpace () {
+  for (var i = 0; i < 2; i++) {
+    var row = Math.floor(Math.random() * GRIDCOUNT),
+        col = Math.floor(Math.random() * GRIDCOUNT);
+
+    var planet = new Body({
+      position: new Vector(row, col),
+      type:     'planet',
+      mass:     1,
+      isFixed:  true
+    });
+
+    universe.add(planet);
+    $space.append(planet.$el);
+  }
+}

@@ -3,34 +3,40 @@
 }
 
 #space {
-  background: #222;
-}
-
-.body {
-  stroke: green;
-  fill: blue;
-  stroke-width: 2px;
-}
-
-.body:hover, .body.fixed:hover {
-  fill: lightblue;
-  stroke-width: 6px;
-}
-
-.body.fixed {
-  stroke: white;
-  fill: lightgrey;
-  stroke-width: 1px;
-}
-
-.body.ship {
-  stroke: red;
-  fill: white;
-  stroke-width: 1px;
+  background: #bbb;
 }
 
 .grid {
-  stroke: lightblue;
+  stroke: #222;
   stroke-width: 1px;
-  stroke-dasharray: 1, 5;
+  stroke-dasharray: 1, 4;
+}
+
+.body {
+  stroke-width: 2px;
+}
+
+.planet {
+  stroke: forestgreen;
+  fill:   blue;
+}
+
+.planet.fixed {
+  stroke: blue;
+  fill:   forestgreen;
+}
+
+.anomaly {
+  stroke: red;
+  fill:   #111;
+}
+
+.anomaly:hover {
+  stroke-width: 4px;
+  fill: grey;
+}
+
+.ship {
+  stroke: orange;
+  fill:   red;
 }

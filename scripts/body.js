@@ -1,5 +1,5 @@
-var GRAVITY_POWER = 2,
-    RADIUS_CAP    = 1;
+var GRAVITY_EXPONENT = 1.5,
+    MINIMUM_DISTANCE = 1;
 
 var Body = function (opts) {
   this.mass         = opts.mass         || 1;
@@ -58,29 +58,41 @@ Body.prototype.updateSVG = function () {
 };
 
 
-Body.prototype.calculateNextAcceleration = function (bodies) {
+Body.prototype.calculateNextAcceleration = function (universe) {
   if (this.isFixed) {
     this.velocity = new Vector(0, 0);
     this.acceleration = new Vector(0, 0);
     return;
   }
 
-  var thisBody = this;
+  var body = this;
 
-  for (var i = 0; i < bodies.length; i++) {
-    var body      = bodies[i];
-
-    if (thisBody !== body && body.type === 'planet') {
-      var radius    = Math.max(RADIUS_CAP, Vector.distance(thisBody.position, body.position)),
-          gravity   = body.mass / (Math.pow(radius, GRAVITY_POWER)),
-          direction = Vector.subtract(body.position, thisBody.position);
+  $.each(universe.planets, function (id, planet) {
+    if (body !== planet) {
+      var radius    = Math.max(MINIMUM_DISTANCE,
+            Vector.distance(body.position, planet.position)),
+          gravity   = planet.mass / (Math.pow(radius, GRAVITY_EXPONENT)),
+          direction = Vector.subtract(planet.position, body.position);
 
       var force = direction.normalize().multiply(gravity);
 
-      thisBody.acceleration.add(force);
+      body.acceleration.add(force);
     }
-  };
-}
+  });
+
+  $.each(universe.anomalies, function (id, anomaly) {
+    if (body !== anomaly) {
+      var radius    = Math.max(MINIMUM_DISTANCE,
+            Vector.distance(body.position, anomaly.position)),
+          gravity   = anomaly.mass / (Math.pow(radius, GRAVITY_EXPONENT)),
+          direction = Vector.subtract(anomaly.position, body.position);
+
+      var force = direction.normalize().multiply(gravity);
+
+      body.acceleration.add(force);
+    }
+  });
+};
 
 Body.prototype.calculateNextVelocity = function () {
   this.velocity.add(this.acceleration.multiply(1 / TICKCOUNT));
@@ -90,13 +102,22 @@ Body.prototype.calculateNextPosition = function () {
   this.position.add(this.velocity);
 };
 
-Body.updateSystem = function (bodies) {
-  for (var i = 0; i < bodies.length; i++) {
-    bodies[i].calculateNextAcceleration(bodies);
-    bodies[i].calculateNextVelocity();
-  };
+Body.updateSystem = function (universe) {
+  $.each(universe.planets, function (id, planet) {
+    planet.calculateNextAcceleration(universe);
+    planet.calculateNextVelocity();
+  });
 
-  for (var i = 0; i < bodies.length; i++) {
-    bodies[i].calculateNextPosition();
-  };
+  $.each(universe.ships, function (id, ship) {
+    ship.calculateNextAcceleration(universe);
+    ship.calculateNextVelocity();
+  });
+
+  $.each(universe.planets, function (id, planet) {
+    planet.calculateNextPosition();
+  });
+
+  $.each(universe.ships, function (id, ship) {
+    ship.calculateNextPosition();
+  });
 };
