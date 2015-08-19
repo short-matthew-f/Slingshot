@@ -18,17 +18,21 @@ Body.prototype.toSVG = function () {
       cy = GRIDSIZE * (this.position.y + 0.5);
 
   if (this.isShip) {
-    var bodyClass = "body ship";
     var r  = GRIDSIZE / 5;
   } else {
-    var bodyClass = "body planet";
     var r  = GRIDSIZE * (4 + Math.log(this.mass, 2)) / 8;
   };
 
-  var $body = $("<circle class='" + bodyClass + "'>")
-                  .attr("cx", cx)
-                  .attr("cy", cy)
-                  .attr("r",  r);
+  var body = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+
+  body.classList.add("body",
+    this.isShip ? "ship" : "planet",
+    this.isFixed ? "fixed" : "motile"
+  );
+
+  var $body = $(body).attr("cx", cx)
+                     .attr("cy", cy)
+                     .attr("r",  r);
 
   return $body;
 };
@@ -48,9 +52,9 @@ Body.prototype.updateSVG = function () {
           .attr("r",  r);
 
   if (this.fixed) {
-    this.$el.addClass('fixed')
+    this.$el[0].classList.add('fixed')
   } else {
-    this.$el.removeClass('fixed');
+    this.$el[0].classList.remove('fixed');
   };
 };
 

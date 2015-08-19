@@ -56,7 +56,7 @@ $('#launch').on('click', function (e) {
 $('#swap').on('click', function (e) {
   planets.forEach(function (planet) {
     if (planet.isShip) { return; }
-    
+
     planet.fixed = !planet.fixed;
   });
 });
@@ -65,15 +65,19 @@ $('#swap').on('click', function (e) {
 
 function addGridToSpace () {
   for (var i = 0; i < GRIDCOUNT; i++) {
-    var hLine = $("<line class='grid'>").attr('x1', 0)
+    var hLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    var vLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    var $hLine = $(hLine).attr('class', 'grid')
+                   .attr('x1', 0)
                    .attr('y1', i * GRIDSIZE)
                    .attr('x2', SVGSIZE)
                    .attr('y2', i * GRIDSIZE);
-    var vLine = $("<line class='grid'>").attr('y1', 0)
+    var $vLine = $(vLine).attr('class', 'grid')
+                   .attr('y1', 0)
                    .attr('x1', i * GRIDSIZE)
                    .attr('y2', SVGSIZE)
                    .attr('x2', i * GRIDSIZE);
 
-    $space.append(hLine).append(vLine);
+    $space.append($hLine).append($vLine);
   };
 };
