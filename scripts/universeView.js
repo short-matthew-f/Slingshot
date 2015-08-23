@@ -8,7 +8,7 @@ function UniverseView (id, universe) {
 UniverseView.prototype.initialize = function () {
   this.setSize();
   this.setGrid();
-  this.setPlanets(2);
+  this.setPlanets(1);
   this.setHandlers();
 };
 

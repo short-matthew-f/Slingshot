@@ -8,6 +8,29 @@ var Universe = function () {
   this.nextAnomalyID = 0;
 };
 
+Universe.prototype.clone = function () {
+  var _universe  = new Universe(),
+      planetIDs  = Object.keys(this.planets),
+      shipIDs    = Object.keys(this.ships),
+      anomalyIDs = Object.keys(this.anomalies);
+
+  var thisUniverse = this;
+
+  planetIDs.forEach(function (id) {
+    _universe.add(thisUniverse.planets[id].clone());
+  });
+
+  shipIDs.forEach(function (id) {
+    _universe.add(thisUniverse.ships[id].clone());
+  });
+
+  anomalyIDs.forEach(function (id) {
+    _universe.add(thisUniverse.anomalies[id].clone());
+  });
+
+  return _universe;
+};
+
 Universe.prototype.add = function (body) {
   switch (body.type) {
     case 'planet':

@@ -1,6 +1,6 @@
 $(function () {
-  var universe     = new Universe,
-      universeView = new UniverseView("#space", universe);
+  var universe     = window.universe     = new Universe,
+      universeView = window.universeView = new UniverseView("#space", universe);
 
   setInterval(function () {
     universe.tick();
@@ -25,7 +25,7 @@ $(function () {
 
     planetIDs.forEach(function (id) {
       var planet = universe.planets[id];
-      
+
       planet.isFree = !planet.isFree;
     });
   });

@@ -1,5 +1,6 @@
-var GRAVITY_EXPONENT = 1.334,
-    MINIMUM_DISTANCE = 0.667;
+var GRAVITY_EXPONENT    = 1.5,
+    GRAVITY_CORRECTION  = 4,
+    MINIMUM_DISTANCE    = 0.667;
 
 var Body = function (opts) {
   this.mass         = opts.mass         || 1;
@@ -11,6 +12,19 @@ var Body = function (opts) {
   this.isFree       = !!opts.isFree;
 
   this.$el          = this.toSVG();
+};
+
+Body.prototype.clone = function () {
+  var _body = new Body({
+    mass:         this.mass,
+    position:     this.position.clone(),
+    velocity:     this.velocity.clone(),
+    acceleration: this.acceleration.clone(),
+    type:         this.type,
+    isFree:       this.isFree,
+  });
+
+  return _body;
 };
 
 Body.prototype.toSVG = function () {
@@ -62,7 +76,7 @@ Body.prototype.gravityFrom = function (otherBody) {
       radius    = Math.max(MINIMUM_DISTANCE, distance),
       gravity   = otherBody.mass / Math.pow(radius, GRAVITY_EXPONENT);
 
-  return direction.normalize().multiply(gravity / 2);
+  return direction.normalize().multiply(gravity / GRAVITY_CORRECTION);
 };
 
 

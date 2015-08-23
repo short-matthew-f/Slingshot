@@ -21,6 +21,10 @@ Vector.distance = function (vectorOne, vectorTwo) {
   return Vector.subtract(vectorOne, vectorTwo).length();
 };
 
+Vector.prototype.clone = function () {
+  return new Vector(this.x, this.y);
+};
+
 Vector.prototype.length = function () {
   return Math.sqrt(this.x * this.x + this.y * this.y);
 };
