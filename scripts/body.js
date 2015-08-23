@@ -1,5 +1,5 @@
-var GRAVITY_EXPONENT = 1.5,
-    MINIMUM_DISTANCE = 1;
+var GRAVITY_EXPONENT = 1.334,
+    MINIMUM_DISTANCE = 0.667;
 
 var Body = function (opts) {
   this.mass         = opts.mass         || 1;
@@ -8,28 +8,19 @@ var Body = function (opts) {
   this.acceleration = opts.acceleration || new Vector(0, 0);
 
   this.type         = opts.type         || 'planet';
-  this.isFixed      = !!opts.isFixed;
+  this.isFree       = !!opts.isFree;
 
-  this.$el      = this.toSVG();
+  this.$el          = this.toSVG();
 };
 
 Body.prototype.toSVG = function () {
   var cx = GRIDSIZE * (this.position.x + 0.5),
-      cy = GRIDSIZE * (this.position.y + 0.5);
-
-  if (this.type === 'ship') {
-    var r  = GRIDSIZE / 5;
-  } else {
-    var r  = GRIDSIZE * (4 + Math.log(this.mass, 2)) / 8;
-  };
+      cy = GRIDSIZE * (this.position.y + 0.5),
+      r  = this.radius();
 
   var body = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
 
-  if (this.isFixed) {
-    body.classList.add('fixed');
-  }
-
-  body.classList.add("body", this.type);
+  body.classList.add("body", this.type, this.isFree ? 'free' : 'fixed');
 
   var $body = $(body).attr("cx", cx)
                      .attr("cy", cy)
@@ -38,44 +29,49 @@ Body.prototype.toSVG = function () {
   return $body;
 };
 
+Body.prototype.radius = function () {
+  if (this.type === 'ship') {
+    return GRIDSIZE / 5;
+  } else {
+    return GRIDSIZE * (4 + Math.log(this.mass, 2)) / 8;
+  };
+};
+
 Body.prototype.updateSVG = function () {
   var cx = GRIDSIZE * (this.position.x + 0.5),
-      cy = GRIDSIZE * (this.position.y + 0.5);
-
-  if (this.type !== 'ship') {
-    var r  = GRIDSIZE * (4 + Math.log(this.mass, 2)) / 8;
-  };
+      cy = GRIDSIZE * (this.position.y + 0.5),
+      r  = this.radius();
 
   this.$el.attr("cx", cx)
           .attr("cy", cy)
           .attr("r",  r);
 
-  if (this.isFixed) {
-    this.$el[0].classList.add('fixed')
+  var el = this.$el[0];
+  if (this.isFree) {
+    el.classList.remove('fixed');
+    el.classList.add('free');
   } else {
-    this.$el[0].classList.remove('fixed');
+    el.classList.remove('free');
+    el.classList.add('fixed');
   };
+};
+
+Body.prototype.gravityFrom = function (otherBody) {
+  var direction = Vector.subtract(otherBody.position, this.position),
+      distance  = Vector.distance(this.position, otherBody.position),
+      radius    = Math.max(MINIMUM_DISTANCE, distance),
+      gravity   = otherBody.mass / Math.pow(radius, GRAVITY_EXPONENT);
+
+  return direction.normalize().multiply(gravity / 2);
 };
 
 
 Body.prototype.calculateNextAcceleration = function (universe) {
   var applyGravity = function (target, actor) {
-    var radius    = Math.max(MINIMUM_DISTANCE,
-          Vector.distance(target.position, actor.position)),
-        gravity   = actor.mass / (Math.pow(radius, GRAVITY_EXPONENT)),
-        direction = Vector.subtract(actor.position, target.position);
-
-    var force = direction.normalize().multiply(gravity);
-
-    target.acceleration.add(force);
+    target.acceleration.add(target.gravityFrom(actor));
   }
 
-  if (this.isFixed) {
-    this.velocity.x     = 0;
-    this.velocity.y     = 0;
-    this.acceleration.x = 0;
-    this.acceleration.y = 0;
-  } else {
+  if (this.isFree) {
     var body       = this,
         planetIDs  = Object.keys(universe.planets),
         anomalyIDs = Object.keys(universe.anomalies);
@@ -89,6 +85,11 @@ Body.prototype.calculateNextAcceleration = function (universe) {
       var anomaly = universe.anomalies[id];
       if (body !== anomaly) { applyGravity(body, anomaly) }
     });
+  } else {
+    this.velocity.x     = 0;
+    this.velocity.y     = 0;
+    this.acceleration.x = 0;
+    this.acceleration.y = 0;
   };
 };
 

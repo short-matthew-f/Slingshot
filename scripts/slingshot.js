@@ -12,7 +12,7 @@ $(function () {
       position: new Vector(1, GRIDCOUNT),
       velocity: new Vector(0, -0.1),
       type:     'ship',
-      isFixed:  false
+      isFree:  true
     });
 
     universe.add(ship);
@@ -20,8 +20,13 @@ $(function () {
   });
 
   $('#swap').on('click', function (e) {
-    $.each(universe.planets, function (id, planet) {
-      planet.isFixed = !planet.isFixed;
+    var planetIDs = Object.keys(universe.planets);
+
+
+    planetIDs.forEach(function (id) {
+      var planet = universe.planets[id];
+      
+      planet.isFree = !planet.isFree;
     });
   });
 });
