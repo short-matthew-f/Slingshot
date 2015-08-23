@@ -59,39 +59,37 @@ Body.prototype.updateSVG = function () {
 
 
 Body.prototype.calculateNextAcceleration = function (universe) {
-  if (this.isFixed) {
-    this.velocity = new Vector(0, 0);
-    this.acceleration = new Vector(0, 0);
-    return;
+  var applyGravity = function (target, actor) {
+    var radius    = Math.max(MINIMUM_DISTANCE,
+          Vector.distance(target.position, actor.position)),
+        gravity   = actor.mass / (Math.pow(radius, GRAVITY_EXPONENT)),
+        direction = Vector.subtract(actor.position, target.position);
+
+    var force = direction.normalize().multiply(gravity);
+
+    target.acceleration.add(force);
   }
 
-  var body = this;
+  if (this.isFixed) {
+    this.velocity.x     = 0;
+    this.velocity.y     = 0;
+    this.acceleration.x = 0;
+    this.acceleration.y = 0;
+  } else {
+    var body       = this,
+        planetIDs  = Object.keys(universe.planets),
+        anomalyIDs = Object.keys(universe.anomalies);
 
-  $.each(universe.planets, function (id, planet) {
-    if (body !== planet) {
-      var radius    = Math.max(MINIMUM_DISTANCE,
-            Vector.distance(body.position, planet.position)),
-          gravity   = planet.mass / (Math.pow(radius, GRAVITY_EXPONENT)),
-          direction = Vector.subtract(planet.position, body.position);
+    planetIDs.forEach(function (id) {
+      var planet = universe.planets[id];
+      if (body !== planet) { applyGravity(body, planet) };
+    });
 
-      var force = direction.normalize().multiply(gravity);
-
-      body.acceleration.add(force);
-    }
-  });
-
-  $.each(universe.anomalies, function (id, anomaly) {
-    if (body !== anomaly) {
-      var radius    = Math.max(MINIMUM_DISTANCE,
-            Vector.distance(body.position, anomaly.position)),
-          gravity   = anomaly.mass / (Math.pow(radius, GRAVITY_EXPONENT)),
-          direction = Vector.subtract(anomaly.position, body.position);
-
-      var force = direction.normalize().multiply(gravity);
-
-      body.acceleration.add(force);
-    }
-  });
+    anomalyIDs.forEach(function (id) {
+      var anomaly = universe.anomalies[id];
+      if (body !== anomaly) { applyGravity(body, anomaly) }
+    });
+  };
 };
 
 Body.prototype.calculateNextVelocity = function () {
@@ -100,24 +98,4 @@ Body.prototype.calculateNextVelocity = function () {
 
 Body.prototype.calculateNextPosition = function () {
   this.position.add(this.velocity);
-};
-
-Body.updateSystem = function (universe) {
-  $.each(universe.planets, function (id, planet) {
-    planet.calculateNextAcceleration(universe);
-    planet.calculateNextVelocity();
-  });
-
-  $.each(universe.ships, function (id, ship) {
-    ship.calculateNextAcceleration(universe);
-    ship.calculateNextVelocity();
-  });
-
-  $.each(universe.planets, function (id, planet) {
-    planet.calculateNextPosition();
-  });
-
-  $.each(universe.ships, function (id, ship) {
-    ship.calculateNextPosition();
-  });
 };

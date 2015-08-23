@@ -29,3 +29,32 @@ Universe.prototype.add = function (body) {
 
   body.$el.data('id', body.id);
 };
+
+Universe.prototype.tick = function () {
+  var universe  = this,
+      planetIDs = Object.keys(this.planets),
+      shipIDs   = Object.keys(this.ships);
+
+  planetIDs.forEach(function (id) {
+    universe.planets[id]
+            .calculateNextAcceleration(universe);
+    universe.planets[id]
+            .calculateNextVelocity();
+  });
+
+  shipIDs.forEach(function (id) {
+    universe.ships[id]
+            .calculateNextAcceleration(universe);
+    universe.ships[id]
+            .calculateNextVelocity();
+  });
+
+  planetIDs.forEach(function (id) {
+    universe.planets[id].calculateNextPosition();
+  });
+
+  shipIDs.forEach(function (id) {
+    universe.ships[id]
+            .calculateNextPosition();
+  });
+};
