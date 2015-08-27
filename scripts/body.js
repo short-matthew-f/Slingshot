@@ -1,73 +1,27 @@
 var GRAVITY_EXPONENT    = 1.5,
-    GRAVITY_CORRECTION  = 4,
+    GRAVITY_CORRECTION  = 2,
     MINIMUM_DISTANCE    = 0.667;
 
 var Body = function (opts) {
-  this.mass         = opts.mass         || 1;
   this.position     = opts.position     || new Vector(0, 0);
   this.velocity     = opts.velocity     || new Vector(0, 0);
   this.acceleration = opts.acceleration || new Vector(0, 0);
 
-  this.type         = opts.type         || 'planet';
-  this.isFree       = !!opts.isFree;
-
-  this.$el          = this.toSVG();
+  this.view         = new BodyView(this);
 };
 
+Body.prototype.pin = function () { this.isFree = false; }
+Body.prototype.release = function () { this.isFree = true; }
+
 Body.prototype.clone = function () {
-  var _body = new Body({
+  var _body = new this.constructor({
     mass:         this.mass,
     position:     this.position.clone(),
     velocity:     this.velocity.clone(),
-    acceleration: this.acceleration.clone(),
-    type:         this.type,
-    isFree:       this.isFree,
+    acceleration: this.acceleration.clone()
   });
 
   return _body;
-};
-
-Body.prototype.toSVG = function () {
-  var cx = GRIDSIZE * (this.position.x + 0.5),
-      cy = GRIDSIZE * (this.position.y + 0.5),
-      r  = this.radius();
-
-  var body = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-
-  body.classList.add("body", this.type, this.isFree ? 'free' : 'fixed');
-
-  var $body = $(body).attr("cx", cx)
-                     .attr("cy", cy)
-                     .attr("r",  r);
-
-  return $body;
-};
-
-Body.prototype.radius = function () {
-  if (this.type === 'ship') {
-    return GRIDSIZE / 5;
-  } else {
-    return GRIDSIZE * (4 + Math.log(this.mass, 2)) / 8;
-  };
-};
-
-Body.prototype.updateSVG = function () {
-  var cx = GRIDSIZE * (this.position.x + 0.5),
-      cy = GRIDSIZE * (this.position.y + 0.5),
-      r  = this.radius();
-
-  this.$el.attr("cx", cx)
-          .attr("cy", cy)
-          .attr("r",  r);
-
-  var el = this.$el[0];
-  if (this.isFree) {
-    el.classList.remove('fixed');
-    el.classList.add('free');
-  } else {
-    el.classList.remove('free');
-    el.classList.add('fixed');
-  };
 };
 
 Body.prototype.gravityFrom = function (otherBody) {
@@ -79,38 +33,53 @@ Body.prototype.gravityFrom = function (otherBody) {
   return direction.normalize().multiply(gravity / GRAVITY_CORRECTION);
 };
 
+// SHIP
 
-Body.prototype.calculateNextAcceleration = function (universe) {
-  var applyGravity = function (target, actor) {
-    target.acceleration.add(target.gravityFrom(actor));
-  }
+var Ship = function Ship (opts) {
+  this.mass   = 1;
+  this.type   = 'ship';
+  this.isFree = true;
 
-  if (this.isFree) {
-    var body       = this,
-        planetIDs  = Object.keys(universe.planets),
-        anomalyIDs = Object.keys(universe.anomalies);
+  Body.call(this, opts);
+};
 
-    planetIDs.forEach(function (id) {
-      var planet = universe.planets[id];
-      if (body !== planet) { applyGravity(body, planet) };
-    });
+Ship.prototype = Object.create(Body.prototype);
+Ship.prototype.constructor = Ship;
 
-    anomalyIDs.forEach(function (id) {
-      var anomaly = universe.anomalies[id];
-      if (body !== anomaly) { applyGravity(body, anomaly) }
-    });
+// PLANET
+
+var Planet = function Planet (opts) {
+  this.mass   = 2.0;
+  this.type   = 'planet';
+  this.isFree = false;
+
+  Body.call(this, opts);
+};
+
+Planet.prototype = Object.create(Body.prototype);
+Planet.prototype.constructor = Planet;
+
+// ANOMALY
+
+var Anomaly = function Anomaly (opts) {
+  this.mass   = 1.0;
+  this.type   = 'anomaly';
+  this.isFree = false;
+
+  Body.call(this, opts);
+};
+
+Anomaly.prototype = Object.create(Body.prototype);
+Anomaly.prototype.constructor = Anomaly;
+
+Anomaly.prototype.addEnergy = function () {
+  this.mass += 0.5;
+};
+
+Anomaly.prototype.sapEnergy = function () {
+  if (this.mass <= 1) {
+    this.mass  = 0.0;
   } else {
-    this.velocity.x     = 0;
-    this.velocity.y     = 0;
-    this.acceleration.x = 0;
-    this.acceleration.y = 0;
+    this.mass -= 0.5;
   };
-};
-
-Body.prototype.calculateNextVelocity = function () {
-  this.velocity.add(this.acceleration.multiply(1 / TICKCOUNT));
-};
-
-Body.prototype.calculateNextPosition = function () {
-  this.position.add(this.velocity);
 };

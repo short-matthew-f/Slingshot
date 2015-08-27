@@ -1,23 +1,93 @@
-function UniverseView (id, universe) {
-  this.$el = $(id);
-  this.universe = universe;
+function UniverseView (universe) {
+  this.$space    = $("#space");
+
+  this.universe  = universe;
+  this.commander = new Commander();
 
   this.initialize();
 };
 
 UniverseView.prototype.initialize = function () {
-  this.setSize();
-  this.setGrid();
-  this.setPlanets(1);
-  this.setHandlers();
+  this.setSVGSize();
+  this.setGridLines();
+  this.setCommander();
+  this.setListeners();
 };
 
-UniverseView.prototype.setSize = function () {
-  this.$el.attr('width', SVGSIZE).attr('height', SVGSIZE);
+UniverseView.prototype.updateView = function (bodyView) {
+  if (bodyView.isPresent) {
+    bodyView.update();
+  } else {
+    this.$space.append(bodyView.$el);
+    bodyView.isPresent = true;
+  };
 };
 
-UniverseView.prototype.setGrid = function () {
-  for (var i = 0; i < GRIDCOUNT; i++) {
+UniverseView.prototype.update = function () {
+  this.universe.ships.forEach(function (ship, i) {
+    ship.view.update();
+  });
+};
+
+
+UniverseView.prototype.setCommander = function () {
+  var addEnergy = this.addEnergy.bind(this),
+      sapEnergy = this.sapEnergy.bind(this);
+
+  addEnergy.doName   = 'addEnergy';
+  addEnergy.undoName = 'sapEnergy';
+
+  sapEnergy.doName   = 'sapEnergy';
+  sapEnergy.undoName = 'addEnergy';
+
+  this.commander.addFunctions(addEnergy, sapEnergy);
+};
+
+
+UniverseView.prototype.addEnergy = function (row, column) {
+  if (this.universe.hasPlanetAt(row, column)) {
+    throw new Error("Your device has no effect on planets!");
+  } else {
+    try {
+      var result = this.universe.addEnergy(row, column);
+
+      if (result.isNew) {
+        this.addBody(result.anomaly);
+      } else {
+        this.updateBody(result.anomaly);
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
+
+UniverseView.prototype.sapEnergy = function (row, column) {
+  if (this.universe.hasPlanetAt(row, column)) {
+    throw new Error("Your device has no effect on planets!");
+  } else {
+    try {
+      var result = this.universe.sapEnergy(row, column);
+
+      if (result.isDead) {
+        this.removeBody(result.anomaly);
+        this.universe.removeBody(row, column);
+      } else {
+        this.updateBody(result.anomaly);
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+};
+
+UniverseView.prototype.setSVGSize = function () {
+  this.$space.attr('width', SVGSIZE).attr('height', SVGSIZE);
+};
+
+UniverseView.prototype.setGridLines = function () {
+  for (var i = 0; i <= GRIDCOUNT; i++) {
     var hLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     var vLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     var $hLine = $(hLine).attr('class', 'grid')
@@ -31,79 +101,42 @@ UniverseView.prototype.setGrid = function () {
                    .attr('y2', SVGSIZE)
                    .attr('x2', i * GRIDSIZE);
 
-    this.$el.append($hLine).append($vLine);
+    this.$space.append($hLine).append($vLine);
   };
 };
 
-UniverseView.prototype.setPlanets = function (count) {
-  for (var i = 0; i < count; i++) {
-    var row = Math.floor(Math.random() * GRIDCOUNT),
-        col = Math.floor(Math.random() * GRIDCOUNT);
-
-    var planet = new Body({
-      position: new Vector(row, col),
-      type:     'planet',
-      mass:     1,
-      isFixed:  true
-    });
-
-    this.universe.add(planet);
-    this.$el.append(planet.$el);
-  };
-};
-
-UniverseView.prototype.setHandlers = function () {
+UniverseView.prototype.setListeners = function () {
   var universe     = this.universe,
       universeView = this;
 
-  universeView.$el.on('mousedown .body', function (e) {
-    var $tar = $(e.target);
+  this.$space.on('mousedown', function (e) {
+    var row    = Math.floor(e.offsetX / GRIDSIZE),
+        column = Math.floor(e.offsetY / GRIDSIZE);
 
-    if ($tar.is('.anomaly')) {
-      var id      = $(e.target).data('id'),
-          anomaly = universe.anomalies[id];
-
-      if (e.shiftKey) {
-        anomaly.$el.remove()
-        delete universe.anomalies[id];
-      } else {
-        anomaly.mass += 0.25;
-      }
-    } else if ($tar.is('svg')) {
-      var i       = Math.floor(e.offsetX / GRIDSIZE),
-          j       = Math.floor(e.offsetY / GRIDSIZE),
-          anomaly = new Body({
-            position: new Vector(i, j),
-            type:     'anomaly',
-            mass:     0.25,
-            isFixed:  true
-          });
-
-      universe.add(anomaly);
-      universeView.add(anomaly);
+    if (e.shiftKey) {
+      var result = universeView.commander.do('sapEnergy', row, column);
+    } else {
+      var result = universeView.commander.do('addEnergy', row, column);
     };
   });
+
+  $('#undo').on('click', function (e) {
+    universeView.commander.undo();
+  });
+
+  $('#redo').on('click', function (e) {
+    universeView.commander.redo();
+  });
 };
 
-UniverseView.prototype.add = function (body) {
-  this.$el.append(body.$el);
+UniverseView.prototype.addBody = function (body) {
+  this.$space.append(body.view.$el);
 };
 
-UniverseView.prototype.update = function () {
-  var universe   = this.universe,
-      planetIDs  = Object.keys(this.universe.planets),
-      shipIDs    = Object.keys(this.universe.ships),
-      anomalyIDs = Object.keys(this.universe.anomalies);
+UniverseView.prototype.updateBody = function (body) {
+  body.view.update();
+};
 
-  planetIDs.forEach(function (id) {
-    universe.planets[id].updateSVG();
-  });
-
-  shipIDs.forEach(function (id) {
-    universe.ships[id].updateSVG();
-  });
-
-  anomalyIDs.forEach(function (id) {
-    universe.anomalies[id].updateSVG();
-  });
+UniverseView.prototype.removeBody = function (body) {
+  body.view.$el.remove();
 };

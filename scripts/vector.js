@@ -57,7 +57,7 @@ Vector.prototype.multiply = function (scalar) {
 Vector.prototype.normalize = function () {
   var length = this.length();
 
-  if (this.x !== 0 || this.y !== 0) {
+  if ( !(this.x == 0 && this.y == 0) ) {
     this.x /= length;
     this.y /= length;
   }

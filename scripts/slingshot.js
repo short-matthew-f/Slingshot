@@ -1,6 +1,12 @@
+var Slingshot = function Slingshot () {
+  this.universe     = new Universe();
+  this.universeView = new UniverseView(universe);
+};
+
+
 $(function () {
   var universe     = window.universe     = new Universe,
-      universeView = window.universeView = new UniverseView("#space", universe);
+      universeView = window.universeView = new UniverseView(universe);
 
   setInterval(function () {
     universe.tick();
@@ -8,15 +14,13 @@ $(function () {
   }, TICKER)
 
   $('#launch').on('click', function (e) {
-    var ship = new Body({
+    var ship = new Ship({
       position: new Vector(1, GRIDCOUNT),
-      velocity: new Vector(0, -0.1),
-      type:     'ship',
-      isFree:  true
+      velocity: new Vector(0, -0.1)
     });
 
-    universe.add(ship);
-    universeView.add(ship);
+    universe.addBody(ship);
+    universeView.addBody(ship);
   });
 
   $('#swap').on('click', function (e) {

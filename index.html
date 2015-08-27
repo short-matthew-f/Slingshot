@@ -8,8 +8,9 @@
 </head>
 <body>
   <div class="control-panel">
-    <button id="launch">Launch Ship</button>
-    <button id="swap">Toggle all planets</button>
+    <button id="launch">Launch Ships</button>
+    <button id="undo">Undo last command</button>
+    <button id="redo">Redo last command</button>
   </div>
 
   <svg id="space"
@@ -21,8 +22,10 @@
   </svg>
 
   <script src="scripts/constants.js"></script>
+  <script src="scripts/commander.js"></script>
   <script src="scripts/vector.js"></script>
   <script src="scripts/body.js"></script>
+  <script src="scripts/bodyView.js"></script>
   <script src="scripts/universe.js"></script>
   <script src="scripts/universeView.js"></script>
   <script src="scripts/slingshot.js"></script>
