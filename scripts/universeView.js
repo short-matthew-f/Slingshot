@@ -110,8 +110,16 @@ UniverseView.prototype.setListeners = function () {
       universeView = this;
 
   this.$space.on('mousedown', function (e) {
-    var row    = Math.floor(e.offsetX / GRIDSIZE),
-        column = Math.floor(e.offsetY / GRIDSIZE);
+    if ($(e.target).is('svg')) {
+      var x = e.offsetX,
+          y = e.offsetY;
+    } else {
+      var x = e.originalEvent.layerX,
+          y = e.originalEvent.layerY;
+    };
+
+    var row    = Math.floor(x / GRIDSIZE),
+        column = Math.floor(y / GRIDSIZE);
 
     if (e.shiftKey) {
       var result = universeView.commander.do('sapEnergy', row, column);

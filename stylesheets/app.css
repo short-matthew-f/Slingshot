@@ -3,6 +3,7 @@
 }
 
 #space {
+  position: relative;
   background: #bbb;
 }
 
@@ -18,17 +19,12 @@
 
 .planet {
   stroke: forestgreen;
-  fill:   blue;
-}
-
-.planet.fixed {
-  stroke: blue;
-  fill:   forestgreen;
+  fill: blue;
 }
 
 .anomaly {
   stroke: red;
-  fill:   #111;
+  fill: #111;
 }
 
 .anomaly:hover {
@@ -38,5 +34,5 @@
 
 .ship {
   stroke: orange;
-  fill:   red;
+  fill: red;
 }

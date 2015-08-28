@@ -1,7 +1,7 @@
 var Commander = function () {
   this.done = [];
   this.undone = [];
-  this.functions = {};
+  this.commands = {};
 };
 
 Commander.argsToArray = function (args) {
@@ -15,7 +15,7 @@ Commander.argsToArray = function (args) {
 }
 
 Commander.prototype.do = function (commandName) {
-  var doFunction   = this.functions[commandName],
+  var doFunction   = this.commands[commandName],
       argumentList = Commander.argsToArray(arguments),
       addToStack   = true;
 
@@ -40,11 +40,11 @@ Commander.prototype.do = function (commandName) {
 Commander.prototype.undo = function () {
   if (this.done.length === 0) { return; }
 
-  var _doneObject       = this.done.pop(),
-      _doneFunction     = this.functions[_doneObject.name],
+  var _done             = this.done.pop(),
+      _doneFunction     = this.commands[_done.name],
       _undoCommandName  = _doneFunction.undoName,
-      _undoArgumentList = _doneObject.args,
-      _undoFunction     = this.functions[_undoCommandName];
+      _undoArgumentList = _done.args,
+      _undoFunction     = this.commands[_undoCommandName];
 
   this.undone.push({
     name: _undoCommandName,
@@ -57,11 +57,11 @@ Commander.prototype.undo = function () {
 Commander.prototype.redo = function () {
   if (this.undone.length === 0) { return; }
 
-  var _undoneObject   = this.undone.pop(),
-      _undoneFunction = this.functions[_undoneObject.name],
+  var _undone         = this.undone.pop(),
+      _undoneFunction = this.commands[_undone.name],
       _doCommandName  = _undoneFunction.undoName,
-      _doArgumentList = _undoneObject.args,
-      _doFunction     = this.functions[_doCommandName];
+      _doArgumentList = _undone.args,
+      _doFunction     = this.commands[_doCommandName];
 
   this.done.push({
     name: _doCommandName,
@@ -84,8 +84,8 @@ Commander.verifyPair = function (funcOne, funcTwo) {
 Commander.prototype.addFunctions = function (doFunc, undoFunc) {
   // only add functions which have been set in opposition to each other
   if (Commander.verifyPair(doFunc, undoFunc)) {
-    this.functions[doFunc.doName]   = doFunc;
-    this.functions[undoFunc.doName] = undoFunc;
+    this.commands[doFunc.doName]   = doFunc;
+    this.commands[undoFunc.doName] = undoFunc;
   } else {
     throw new Error("Functions must be passed in matching pairs");
   };

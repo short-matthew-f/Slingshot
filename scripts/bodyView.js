@@ -28,10 +28,9 @@ BodyView.prototype.update = function () {
 
 BodyView.prototype.className = function () {
   var baseName  = "body",
-      typeName  = this.body.constructor.name.toLowerCase(),
-      fixedName = this.body.isFree ? 'free' : 'fixed';
+      typeName  = this.body.constructor.name.toLowerCase();
 
-  return [baseName, typeName, fixedName].join(' ');
+  return [baseName, typeName].join(' ');
 };
 
 BodyView.prototype.radius = function () {

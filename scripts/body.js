@@ -1,7 +1,3 @@
-var GRAVITY_EXPONENT    = 1.5,
-    GRAVITY_CORRECTION  = 2,
-    MINIMUM_DISTANCE    = 0.667;
-
 var Body = function (opts) {
   this.position     = opts.position     || new Vector(0, 0);
   this.velocity     = opts.velocity     || new Vector(0, 0);
@@ -38,7 +34,6 @@ Body.prototype.gravityFrom = function (otherBody) {
 var Ship = function Ship (opts) {
   this.mass   = 1;
   this.type   = 'ship';
-  this.isFree = true;
 
   Body.call(this, opts);
 };
@@ -51,7 +46,6 @@ Ship.prototype.constructor = Ship;
 var Planet = function Planet (opts) {
   this.mass   = 2.0;
   this.type   = 'planet';
-  this.isFree = false;
 
   Body.call(this, opts);
 };
@@ -64,7 +58,6 @@ Planet.prototype.constructor = Planet;
 var Anomaly = function Anomaly (opts) {
   this.mass   = 1.0;
   this.type   = 'anomaly';
-  this.isFree = false;
 
   Body.call(this, opts);
 };
