@@ -122,7 +122,19 @@ UniverseView.prototype.setListeners = function () {
         column = Math.floor(y / GRIDSIZE);
 
     if (e.shiftKey) {
-      var result = universeView.commander.do('sapEnergy', row, column);
+      try {
+        var result = universeView.commander.do('sapEnergy', row, column);
+      } catch (e) {
+        console.log(e);
+      }
+
+    } else if (e.altKey) {
+      var planet = new Planet({
+        position: new Vector(row, column)
+      });
+
+      universe.addBody(planet);
+      universeView.addBody(planet);
     } else {
       var result = universeView.commander.do('addEnergy', row, column);
     };

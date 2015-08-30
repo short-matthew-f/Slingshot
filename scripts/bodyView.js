@@ -12,7 +12,7 @@ BodyView.prototype.initialize = function () {
   this.$el = $(el).attr("cx", cx)
                   .attr("cy", cy)
                   .attr("r",  r)
-                  .attr("class", this.className());
+                  .attr("class", this.className);
 };
 
 BodyView.prototype.update = function () {
@@ -22,23 +22,45 @@ BodyView.prototype.update = function () {
 
   this.$el.attr("cx", cx)
           .attr("cy", cy)
-          .attr("r",  r)
-          .attr("class", this.className());;
+          .attr("r",  r);
 };
 
-BodyView.prototype.className = function () {
-  var baseName  = "body",
-      typeName  = this.body.constructor.name.toLowerCase();
 
-  return [baseName, typeName].join(' ');
+var ShipView = function (body) {
+  this.className = "body ship";
+
+  BodyView.call(this, body);
 };
 
-BodyView.prototype.radius = function () {
-  if (this.body instanceof Ship) {
-    return GRIDSIZE / 5;
-  } else if (this.body instanceof Planet) {
-    return GRIDSIZE / 2;
-  } else {
-    return GRIDSIZE * Math.sqrt(this.body.mass) / 4;
-  }
+ShipView.prototype = Object.create(BodyView.prototype);
+ShipView.prototype.constructor = ShipView;
+
+ShipView.prototype.radius = function () {
+  return GRIDSIZE / 5;
+};
+
+var PlanetView = function (body) {
+  this.className = "body planet";
+
+  BodyView.call(this, body);
+};
+
+PlanetView.prototype = Object.create(BodyView.prototype);
+PlanetView.prototype.constructor = PlanetView;
+
+PlanetView.prototype.radius = function () {
+  return GRIDSIZE / 2;
+};
+
+var AnomalyView = function (body) {
+  this.className = "body anomaly";
+
+  BodyView.call(this, body);
+};
+
+AnomalyView.prototype = Object.create(BodyView.prototype);
+AnomalyView.prototype.constructor = AnomalyView;
+
+AnomalyView.prototype.radius = function () {
+  return GRIDSIZE * Math.sqrt(this.body.mass) / 4;
 };

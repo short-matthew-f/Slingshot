@@ -2,12 +2,7 @@ var Body = function (opts) {
   this.position     = opts.position     || new Vector(0, 0);
   this.velocity     = opts.velocity     || new Vector(0, 0);
   this.acceleration = opts.acceleration || new Vector(0, 0);
-
-  this.view         = new BodyView(this);
 };
-
-Body.prototype.pin = function () { this.isFree = false; }
-Body.prototype.release = function () { this.isFree = true; }
 
 Body.prototype.clone = function () {
   var _body = new this.constructor({
@@ -32,10 +27,12 @@ Body.prototype.gravityFrom = function (otherBody) {
 // SHIP
 
 var Ship = function Ship (opts) {
-  this.mass   = 1;
-  this.type   = 'ship';
-
   Body.call(this, opts);
+
+  this.mass = 1.0;
+  this.type = 'ship';
+
+  this.view = new ShipView(this);
 };
 
 Ship.prototype = Object.create(Body.prototype);
@@ -44,10 +41,12 @@ Ship.prototype.constructor = Ship;
 // PLANET
 
 var Planet = function Planet (opts) {
-  this.mass   = 2.0;
-  this.type   = 'planet';
-
   Body.call(this, opts);
+
+  this.mass = 1.0;
+  this.type = 'planet';
+
+  this.view = new PlanetView(this);
 };
 
 Planet.prototype = Object.create(Body.prototype);
@@ -56,23 +55,23 @@ Planet.prototype.constructor = Planet;
 // ANOMALY
 
 var Anomaly = function Anomaly (opts) {
-  this.mass   = 1.0;
-  this.type   = 'anomaly';
-
   Body.call(this, opts);
+
+  this.mass = 2.0;
+  this.type = 'anomaly';
+
+  this.view = new AnomalyView(this);
 };
 
 Anomaly.prototype = Object.create(Body.prototype);
 Anomaly.prototype.constructor = Anomaly;
 
 Anomaly.prototype.addEnergy = function () {
-  this.mass += 0.5;
+  this.mass *= 1.5;
 };
 
 Anomaly.prototype.sapEnergy = function () {
-  if (this.mass <= 1) {
-    this.mass  = 0.0;
-  } else {
-    this.mass -= 0.5;
-  };
+  this.mass /= 1.5;
+
+  if (this.mass < 2.0) { this.mass  = 0.0; }
 };

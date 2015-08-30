@@ -2,19 +2,17 @@
 
 // GRAPHIC
 SVGSIZE   = 600;
-GRIDCOUNT = 11;
+GRIDCOUNT = 15;
 GRIDSIZE  = SVGSIZE / GRIDCOUNT;
 TICKCOUNT = 50;
 TICKER    = (1000 / TICKCOUNT);
 
 // PHYSICAL
-GRAVITY_EXPONENT    = 1.5;
-GRAVITY_CORRECTION  = 2;
-MINIMUM_DISTANCE    = 0.667;
+GRAVITY_EXPONENT    = 1.667;
+GRAVITY_CORRECTION  = 5;
+MINIMUM_DISTANCE    = 0.334;
 
 
-
-/* Game */
 
 $(function () {
   var universe     = window.universe     = new Universe,
@@ -48,7 +46,7 @@ $(function () {
   $('#launch').on('click', function (e) {
     var ship = new Ship({
       position: new Vector(1, GRIDCOUNT),
-      velocity: new Vector((Math.random() - 0.5) / 10, (Math.random() - 0.5) / 10)
+      velocity: new Vector(0.0, -0.05)
     });
 
     universe.addBody(ship);

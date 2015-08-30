@@ -38,8 +38,9 @@ Universe.prototype.addEnergy = function (row, column) {
 
 Universe.prototype.sapEnergy = function (row, column) {
   var result = {};
-
-  if (this.hasAnomalyAt(row, column)) {
+  if (this.hasPlanetAt(row, column)) {
+    throw new Error("Your device has no effect on planets!");
+  } else if (this.hasAnomalyAt(row, column)) {
     result.anomaly = this.grid[row][column];
     result.anomaly.sapEnergy();
 
@@ -48,6 +49,8 @@ Universe.prototype.sapEnergy = function (row, column) {
     } else {
       result.isDead = false;
     };
+  } else {
+    throw new Error("Can't remove energy when there isn't any to take!")
   };
 
   return result;
